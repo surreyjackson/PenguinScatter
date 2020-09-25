@@ -1,0 +1,190 @@
+<style>
+    .hidden
+    {
+        display:none;
+    }
+    #tooltip
+    {
+        position:absolute;
+        width:200px;
+        height:auto;
+        pointer-events: none;
+    }
+    td
+    {
+        border:solid black 2px;
+        
+    }
+</style>
+<script type = "text/javascript" src = "https://d3js.org/d3.v5.min.js"></script>
+<script>
+    var drawFinalPlot = function(penguins,screen,xScale,yScale)
+    {
+        console.log("it is being built")
+        d3.select("#scatterPlot")
+            .selectAll("circle")
+            .data(penguins)
+            .enter()
+            .append("circle")
+            .attr("cx",getFinal)
+            .attr("cy",hwMean)
+            .attr('r',2)
+            
+            .on("mouseenter",function(penguin)
+            {
+                console.log("hovering");
+                var xPos = d3.event.pageX;
+                var yPos = d3.event.pageY;
+                
+                d3.select("#tooltip")
+                    .classed("hidden",false)
+                    .style("top",yPos+"px")
+                    .style("left",xPos+"px");
+                d3.select("img")
+                    .attr("src",getPicture(penguin));
+            })
+    }
+    var initFinalGraph = function(penguins)
+    {
+        var screen = {width:600,height:600}
+        
+        d3.select("#scatterPlot")
+            .attr("width",screen.width)
+            .attr("height",screen.height)
+        var xScale = d3.scaleLinear()
+            .domain([0,100])
+            .range([0,screen.width])
+        var yScale = d3.scaleLinear()
+            .domain([0,50])
+            .range([screen.height,0])
+        
+        drawFinalPlot(penguins,screen,xScale,yScale);
+    }
+    
+    var drawQuizPlot = function(penguins,screen,xScale,yScale)
+    {
+        console.log("it is being built")
+        d3.select("#scatterPlot")
+            .selectAll("circle")
+            .data(penguins)
+            .enter()
+            .append("circle")
+            .attr("cx",hwMean)
+            .attr("cy",quizzesMean)
+            .attr('r',2)
+            
+            .on("mouseenter",function(penguin)
+            {
+                console.log("hovering");
+                var xPos = d3.event.pageX;
+                var yPos = d3.event.pageY;
+                
+                d3.select("#tooltip")
+                    .classed("hidden",false)
+                    .style("top",yPos+"px")
+                    .style("left",xPos+"px");
+                d3.select("img")
+                    .attr("src",getPicture(penguin));
+            })
+    }
+    var initQuizGraph = function(penguins)
+    {
+        var screen = {width:600,height:600}
+        
+        d3.select("#scatterPlot")
+            .attr("width",screen.width)
+            .attr("height",screen.height)
+        var xScale = d3.scaleLinear()
+            .domain([0,50])
+            .range([0,screen.width])
+        var yScale = d3.scaleLinear()
+            .domain([0,10])
+            .range([screen.height,0])
+        
+        drawQuizPlot(penguins,screen,xScale,yScale);
+    }
+    var penguinsPromise = d3.json("classData.json");
+    
+    var success = function(penguins)
+    {
+        console.log("it worked!",penguins);
+        initFinalGraph(penguins);
+        d3.select("#final").on("click",function(){
+            clearPlot();
+            initFinalGraph(penguins);
+        })
+        d3.select("#quiz").on("click",function(){
+            clearPlot();
+            initQuizGraph(penguins);
+        })
+    }
+        var failure = function(errorMSG)
+    {
+        console.log("It failed!", errorMSG);
+    }
+    penguinsPromise.then(success,failure);
+         var testsMean = function(penguin)
+    {
+        var tests = getTests(penguin);
+        var grades = tests.map(getGrade);
+        return d3.mean(grades).toFixed(2);
+    }
+    
+    var quizzesMean = function(penguin)
+    {
+        var quizzes = getQuizzes(penguin);
+        var grades = quizzes.map(getGrade);
+        return d3.mean(grades).toFixed(2);
+    }
+    
+    var hwMean = function(penguin)
+    {
+        var hw = getHw(penguin);
+        var grades = hw.map(getGrade);
+        return d3.mean(grades).toFixed(2);
+    }
+    
+    var getTests = function(penguin)
+    {
+        return penguin.test;
+    }
+    
+    var getQuizzes = function(penguin)
+    {
+        return penguin.quizes;
+    }
+    
+    var getHw = function(penguin)
+    {
+        return penguin.homework;
+    }
+    
+    var getPicture = function(penguin)
+    {
+        var image = "imgs/" +penguin.picture;
+        return image;
+    }
+    var getFinal = function(penguin)
+    {
+        var final = penguin.final;
+        return final[0].grade;
+    }
+    var getGrade = function(array)
+    {
+        return array.grade;
+    }
+    var clearPlot = function()
+    {
+    d3.selectAll("circle")
+        .remove();
+    }
+</script>
+<h1>Final Grade vs Mean HW Grade</h1>
+<svg id="scatterPlot"></svg>
+<div class="hidden" id="tooltip">
+    <img>
+</div>
+<table>
+    <td id=final>Final vs Hw Mean</td>
+    <td id=quiz>Hw Mean vs Quiz Mean</td>
+</table>
