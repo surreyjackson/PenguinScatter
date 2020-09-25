@@ -112,10 +112,12 @@
         d3.select("#final").on("click",function(){
             clearPlot();
             initFinalGraph(penguins);
+            d3.select("h1").text("Final Grade vs Mean HW Grade")
         })
         d3.select("#quiz").on("click",function(){
             clearPlot();
             initQuizGraph(penguins);
+            d3.select("h1").text("Mean HW Grade vs Mean Quiz Grade")
         })
     }
         var failure = function(errorMSG)
